@@ -25,9 +25,7 @@ public class Day3 {
         }
 
         boolean[][] houses = new boolean[countUP + countDOWN + 1][countRIGHT + countLEFT + 1];
-        for (int i = 0; i < countUP + countDOWN + 1; i++) {
-            for (int j = 0; j < countRIGHT + countLEFT + 1; j++) {houses[i][j] = false;}
-        }
+        for (int i = 0; i < countUP + countDOWN + 1; i++) {Arrays.fill(houses[i], false);}
 
         int[] location = {countUP, countLEFT};
         houses[location[0]][location[1]] = true;
@@ -61,9 +59,7 @@ public class Day3 {
         }
 
         boolean[][] houses = new boolean[countUP + countDOWN + 1][countRIGHT + countLEFT + 1];
-        for (int i = 0; i < countUP + countDOWN + 1; i++) {
-            for (int j = 0; j < countRIGHT + countLEFT + 1; j++) {houses[i][j] = false;}
-        }
+        for (int i = 0; i < countUP + countDOWN + 1; i++) {Arrays.fill(houses[i], false);}
 
         int[] location = {countUP, countLEFT};
         int[] santaLocation = location.clone();

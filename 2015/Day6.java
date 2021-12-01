@@ -14,11 +14,7 @@ public class Day6 {
 
     public static int lightsLit(Scanner fileScanner) { 
         boolean[][] grid = new boolean[1000][1000];
-        for (int i = 0; i < grid.length; i++) {
-            for (int j = 0; j < grid[0].length; j++) {
-                grid[i][j] = false;
-            }
-        } 
+        for (int i = 0; i < grid.length; i++) {Arrays.fill(grid[i], false);} 
 
         int count = 0;
         while (fileScanner.hasNextLine()) {
@@ -58,11 +54,7 @@ public class Day6 {
 
     public static int totalBrightness(Scanner fileScanner) {
         int[][] grid = new int[1000][1000];
-        for (int i = 0; i < grid.length; i++) {
-            for (int j = 0; j < grid[0].length; j++) {
-                grid[i][j] = 0;
-            }
-        } 
+        for (int i = 0; i < grid.length; i++) {Arrays.fill(grid[i], 0);} 
 
         int brightness = 0;
         while (fileScanner.hasNextLine()) {
