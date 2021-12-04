@@ -7,12 +7,12 @@ public class Day1 {
         File file = new File("inputs/input1.txt");
         try {
             Scanner fileScanner = new Scanner(file);
-            if (test == 1) {System.out.println(numberOfIncreases(fileScanner));}
-            else if (test == 2) {System.out.println(numberOfTripletIncreases(fileScanner));}
+            if (test == 1) {System.out.println(part1(fileScanner));}
+            else if (test == 2) {System.out.println(part2(fileScanner));}
         } catch (FileNotFoundException ex) {}
     }
     
-    public static int numberOfIncreases(Scanner fileScanner) {
+    public static int part1(Scanner fileScanner) {
         ArrayList<Integer> depths = new ArrayList<Integer>();
         while (fileScanner.hasNextInt()) {
             depths.add(fileScanner.nextInt());
@@ -27,7 +27,7 @@ public class Day1 {
         return increases;
     }
 
-    public static int numberOfTripletIncreases(Scanner fileScanner) {
+    public static int part2(Scanner fileScanner) {
         ArrayList<Integer> depths = new ArrayList<Integer>();
         while (fileScanner.hasNextInt()) {
             depths.add(fileScanner.nextInt());

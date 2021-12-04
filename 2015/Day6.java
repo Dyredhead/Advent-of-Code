@@ -7,12 +7,12 @@ public class Day6 {
         try {
             File file = new File("inputs/input6.txt");
             Scanner fileScanner = new Scanner(file);
-            if (test == 1) {System.out.println(lightsLit(fileScanner));}
-            else if (test == 2) {System.out.println(totalBrightness(fileScanner));}
+            if (test == 1) {System.out.println(part1(fileScanner));}
+            else if (test == 2) {System.out.println(part2(fileScanner));}
         } catch (FileNotFoundException ex) {}
     }
 
-    public static int lightsLit(Scanner fileScanner) { 
+    public static int part1(Scanner fileScanner) { 
         boolean[][] grid = new boolean[1000][1000];
         for (int i = 0; i < grid.length; i++) {Arrays.fill(grid[i], false);} 
 
@@ -52,7 +52,7 @@ public class Day6 {
         return count;
     }
 
-    public static int totalBrightness(Scanner fileScanner) {
+    public static int part2(Scanner fileScanner) {
         int[][] grid = new int[1000][1000];
         for (int i = 0; i < grid.length; i++) {Arrays.fill(grid[i], 0);} 
 

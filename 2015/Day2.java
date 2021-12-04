@@ -8,12 +8,12 @@ public class Day2 {
         File file = new File("inputs/input2.txt");
         try {
             Scanner fileScanner = new Scanner(file);
-            if (test == 1) {System.out.println(totalWrappingPaperNeeded(fileScanner));}
-            else if (test == 2) {System.out.println(totalRibbonNeeded(fileScanner));}
+            if (test == 1) {System.out.println(part1(fileScanner));}
+            else if (test == 2) {System.out.println(part2(fileScanner));}
         } catch (FileNotFoundException ex) {}
     }
 
-    public static int totalWrappingPaperNeeded(Scanner fileScanner) {
+    public static int part1(Scanner fileScanner) {
         int total = 0;
         while (fileScanner.hasNextLine()) {
             String[] lineStr = fileScanner.nextLine().split("x");
@@ -28,7 +28,7 @@ public class Day2 {
         return total;
     }
 
-    public static int totalRibbonNeeded(Scanner fileScanner) {
+    public static int part2(Scanner fileScanner) {
         int total = 0;
         while (fileScanner.hasNextLine()) {
             String[] lineStr = fileScanner.nextLine().split("x");

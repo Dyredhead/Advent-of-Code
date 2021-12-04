@@ -7,12 +7,12 @@ public class Day1 {
         File file = new File("inputs/input1.txt");
         try {
             Scanner fileScanner = new Scanner(file);
-            if (test == 1) {System.out.println(whatFloor(fileScanner));}
-            else if (test == 2) {System.out.println(basement(fileScanner));}
+            if (test == 1) {System.out.println(part1(fileScanner));}
+            else if (test == 2) {System.out.println(part2(fileScanner));}
         } catch (FileNotFoundException ex) {}
     }
 
-    public static int whatFloor(Scanner fileScanner) {
+    public static int part1(Scanner fileScanner) {
         String directions = fileScanner.nextLine();
         int floor = 0;
         for (int i = 0; i < directions.length(); i++) {
@@ -26,7 +26,7 @@ public class Day1 {
         return floor;
     }
 
-    public static int basement(Scanner fileScanner) {
+    public static int part2(Scanner fileScanner) {
         String directions = fileScanner.nextLine();
         int floor = 0;
         int position = 0;

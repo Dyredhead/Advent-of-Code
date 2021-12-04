@@ -7,12 +7,12 @@ public class Day3 {
         File file = new File("inputs/input3.txt");
         try {
             Scanner fileScanner = new Scanner(file);
-            if (test == 1) {System.out.println(Santa(fileScanner));} 
-            else if (test == 2) {System.out.println(RoboSanta(fileScanner));}  
+            if (test == 1) {System.out.println(part1(fileScanner));} 
+            else if (test == 2) {System.out.println(part2(fileScanner));}  
         } catch (FileNotFoundException ex) {}
     }
 
-    public static int Santa(Scanner fileScanner) {
+    public static int part1(Scanner fileScanner) {
         int count = 1; 
         String directions = fileScanner.nextLine();
 
@@ -46,7 +46,7 @@ public class Day3 {
         return count;
     }
 
-    public static int RoboSanta(Scanner fileScanner) {
+    public static int part2(Scanner fileScanner) {
         int count = 1;
         String directions = fileScanner.nextLine();
 

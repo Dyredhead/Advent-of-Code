@@ -3,7 +3,8 @@ import java.io.*;
 
 public class Day3 {
     public static void main(String[] args) {
-        int test = Integer.parseInt(args[0]);
+        //int test = Integer.parseInt(args[0]);
+        int test = 2;
         File file = new File("inputs/input3.txt");
         try {
             Scanner fileScanner = new Scanner(file);
@@ -74,9 +75,11 @@ public class Day3 {
         if (powerTest.equals("gamma") || powerTest.equals("O2")) {
             if (countZero > countOne) {return '0';}
             else if (countOne > countZero) {return '1';}
+            else {return '1';}
         } else if (powerTest.equals("epsilon") || powerTest.equals("CO2")) {
             if (countZero < countOne) {return '0';}
             else if (countOne < countZero) {return '1';}
+            else {return '0';}
         }
         return '2';
     }

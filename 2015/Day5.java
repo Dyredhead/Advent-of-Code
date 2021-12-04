@@ -7,12 +7,12 @@ public class Day5 {
         File file = new File("inputs/input5.txt");
         try {
             Scanner fileScanner = new Scanner(file);
-            if (test == 1) {System.out.println(niceStrings(fileScanner));}
-            else if (test == 2) {System.out.println(nicerStrings(fileScanner));}
+            if (test == 1) {System.out.println(part1(fileScanner));}
+            else if (test == 2) {System.out.println(part2(fileScanner));}
         } catch (FileNotFoundException ex) {}   
     }
 
-    public static int niceStrings(Scanner fileScanner) {
+    public static int part1(Scanner fileScanner) {
         int count = 0;
         while (fileScanner.hasNextLine()) {
             String line = fileScanner.nextLine();
@@ -44,7 +44,7 @@ public class Day5 {
         return count;
     }
 
-    public static int nicerStrings(Scanner fileScanner) {
+    public static int part2(Scanner fileScanner) {
         int count = 0;
         while (fileScanner.hasNextLine()) {
             String line = fileScanner.nextLine();
@@ -52,20 +52,14 @@ public class Day5 {
             boolean twoPair = false;
             for (int i = 0; i < line.length()-1; i++) {
                 String pair = line.substring(i, i+2);
-                if (line.indexOf(pair, i+2) != -1) {
-                    twoPair = true;
-                    break;
-                } 
+                if (line.indexOf(pair, i+2) != -1) {twoPair = true; break;} 
             }
-
             boolean splitPair = false;
             for (int i = 0; i < line.length()-2; i++) {
                 if (line.charAt(i) == line.charAt(i+2)) {splitPair = true; break;}
             }
-
             if (twoPair && splitPair) {count++;}
         }
-
         return count;
     } 
 }

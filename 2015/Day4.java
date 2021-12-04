@@ -8,12 +8,12 @@ public class Day4 {
         File file = new File("inputs/input4.txt");
         try {
             Scanner fileScanner = new Scanner(file);
-            if (test == 1) {System.out.println(findFive0s(fileScanner));}
-            else if (test == 2) {System.out.println(findSix0s(fileScanner));}
+            if (test == 1) {System.out.println(part1(fileScanner));}
+            else if (test == 2) {System.out.println(part2(fileScanner));}
         } catch (FileNotFoundException ex) {}
     }
     
-    public static int findFive0s(Scanner fileScanner) {
+    public static int part1(Scanner fileScanner) {
         String secretKey = fileScanner.nextLine();
 
         int hashNumber = 1;
@@ -25,7 +25,7 @@ public class Day4 {
         }
     }
 
-    public static int findSix0s(Scanner fileScanner) {
+    public static int part2(Scanner fileScanner) {
         String secretKey = fileScanner.nextLine();
         
         int hashNumber = 1;

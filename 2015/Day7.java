@@ -7,14 +7,14 @@ public class Day7 {
         try {
             File file = new File("inputs/input7.txt"); 
             Scanner fileScannerVars = new Scanner(file);
-            if (test == 1) {System.out.println(valueOfA(fileScannerVars, file));}
-            else if (test == 2) {System.out.println(xyz(fileScannerVars));}
+            if (test == 1) {System.out.println(part1(fileScannerVars, file));}
+            else if (test == 2) {System.out.println(part2(fileScannerVars));}
         } catch (FileNotFoundException ex) {
             ex.printStackTrace();
         }
     }
 
-    public static int valueOfA(Scanner fileScannerVars, File file) { 
+    public static int part1(Scanner fileScannerVars, File file) { 
         ArrayList<ArrayList<String>> dictionary = new ArrayList<ArrayList<String>>(); ArrayList<String> line;
         dictionary.add(new ArrayList<String>()); dictionary.add(new ArrayList<String>()); 
         Collections.fill(dictionary.get(1), "null");
@@ -185,8 +185,7 @@ public class Day7 {
     //     return a;
     // }
 
-    public static int xyz(Scanner filScanner) {
-        int a = 0;
-        return a;
+    public static int part2(Scanner filScanner) {
+        return 0;
     }
 }

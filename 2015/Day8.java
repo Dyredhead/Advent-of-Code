@@ -3,17 +3,16 @@ import java.io.*;
 
 public class Day8 {
     public static void main(String[] args) {
-        //int test = Integer.parseInt(args[0]);
-        int test = 1;
+        int test = Integer.parseInt(args[0]);
         try {
             File file = new File("inputs/input8.txt");
             Scanner fileScanner = new Scanner(file);
-            if (test == 1) {System.out.println(literalVSmemory(fileScanner));}
-            else if (test == 2) {System.out.println(literalVSmemory(fileScanner));}
+            if (test == 1) {System.out.println(part1(fileScanner));}
+            else if (test == 2) {System.out.println(part2(fileScanner));}
         } catch (FileNotFoundException ex) {}
     }
     
-    public static int literalVSmemory(Scanner fileScanner) {
+    public static int part1(Scanner fileScanner) {
         int literal = 0;
         int memory = 0;
         while (fileScanner.hasNextLine()) {
@@ -27,12 +26,13 @@ public class Day8 {
                     char escapeSequence = line.charAt(i+1);
                     if (escapeSequence == '\"' || escapeSequence == '\\') {i++; } 
                     else if (escapeSequence == 'x') {i += 3;}
-                } else {
-                    memory++;
-                }
+                } else { memory++;}
             }
         }
-        System.out.println("literal: " + literal + "\nmemory: " + memory);
         return literal - memory;
+    }
+
+    public static int part2(Scanner fileScanner) {
+        return 0;
     }
 }
