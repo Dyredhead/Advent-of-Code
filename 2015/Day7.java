@@ -74,18 +74,8 @@ public class Day7 {
                                 }
                             }
                         } else if (line.get(1).equals("RSHIFT")) {
-                            int RSHIFTnum1; int RSHIFTnum2;  
                             try {
-                                RSHIFTnum1 = Integer.parseInt(line.get(0));
-                            } catch (NumberFormatException ex) {
-                                if (!isVarDefined(dictionary, var)) {
-                                    RSHIFTnum1 = Integer.parseInt(varDef(dictionary, line.get(0)));
-                            }
-                            
-                            
-                            
-                            try {
-                                  
+                                int RSHIFTnum1 = Integer.parseInt(line.get(0));
                                 int RSHIFTnum2 = Integer.parseInt(line.get(2));
                                 int RSHIFT1To2 = RSHIFTnum1 >> RSHIFTnum2;   
                                 line.set(0, Integer.toString(RSHIFT1To2));

@@ -80,8 +80,4 @@ public class Day3 {
         }
         return '2';
     }
-
-
-
-
 }
