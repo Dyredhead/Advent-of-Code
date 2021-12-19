@@ -5,7 +5,7 @@ public class Day7 {
     public static void main(String[] args) {
         int test = 1; //Integer.parseInt(args[0]);
         try {
-            File file = new File("inputs/input7.txt"); 
+            File file = new File("2015/inputs/input7.txt"); 
             Scanner fileScannerVars = new Scanner(file);
             if (test == 1) {System.out.println(part1(fileScannerVars, file));}
             else if (test == 2) {System.out.println(part2(fileScannerVars));}

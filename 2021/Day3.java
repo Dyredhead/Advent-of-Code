@@ -3,14 +3,13 @@ import java.io.*;
 
 public class Day3 {
     public static void main(String[] args) {
-        //int test = Integer.parseInt(args[0]);
-        int test = 2;
+        int test = Integer.parseInt(args[0]);
         File file = new File("inputs/input3.txt");
         try {
             Scanner fileScanner = new Scanner(file);
             if (test == 1) {System.out.println(part1(fileScanner));}
             else if (test == 2) {System.out.println(part2(fileScanner));}
-        } catch (FileNotFoundException ex) {}
+        } catch (FileNotFoundException ex) {System.out.println("file not found");}
     }
 
     public static int part1(Scanner fileScanner) {
@@ -43,19 +42,19 @@ public class Day3 {
             for (int j = O2report.size()-1; j >= 0 ; j--) {
                 String line = O2report.get(j);
                 if (line.charAt(i) != bit && O2report.size() != 1) {O2report.remove(j);}
-                if (O2report.size() == 1) {O2RatingBinary = line; break;}
+                if (O2report.size() == 1) {O2RatingBinary = O2report.get(0); break;}
             }
             if (!O2RatingBinary.equals("")) {break;}
         }
-
+        
         ArrayList<String> CO2report = new ArrayList<String>(report);
         String CO2RatingBinary = "";
         for (int i = 0; i < report.get(0).length(); i++) {
             char bit = bitCounterInColoumn(CO2report, i, "CO2");
             for (int j = CO2report.size()-1; j >= 0 ; j--) {
                 String line = CO2report.get(j);
-                if (line.charAt(i) != bit && O2report.size() != 1) {O2report.remove(j);}
-                if (O2report.size() == 1) {CO2RatingBinary = line; break;}
+                if (line.charAt(i) != bit && CO2report.size() != 1) {CO2report.remove(j);}
+                if (CO2report.size() == 1) {CO2RatingBinary = CO2report.get(0); break;}
             }
             if (!CO2RatingBinary.equals("")) {break;}
         }
