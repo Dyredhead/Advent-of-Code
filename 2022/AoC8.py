@@ -34,14 +34,14 @@ def isVisible(row, col):
         return True
 
     #right [0,1]
-    for c in range(size, col, -1):
+    for c in range(size-1, col+1, -1):
         if input[row][c] > h:
             break
     else: 
         return True
     
     #down
-    for r in range(size, row, -1):
+    for r in range(size-1, row+1, -1):
         if input[r][col] > h:
             break
     else: 
