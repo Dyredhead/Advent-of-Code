@@ -35,12 +35,24 @@ def isVisible(row, col):
 
     #right [0,1]
     for c in range(size, col, -1):
+        if input[row][c] > h:
+            break
+    else: 
+        return True
     
     #down
     for r in range(size, row, -1):
+        if input[r][col] > h:
+            break
+    else: 
+        return True
     
     #left
     for c in range(0, col, 1):
+        if input[row][c] > h:
+            break
+    else: 
+        return True
 
     return False
 
