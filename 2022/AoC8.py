@@ -7,7 +7,7 @@ DIRECTIONS = {
     "left": [0,-1]
 }
 
-size = 5
+size = 99
 
 def main():
     input = []
@@ -22,7 +22,7 @@ def main():
             # if isVisible(input, row, col): 
             #     result += 1
             temp = scenic_score(input, row, col)
-            print("temp: " + str(temp))
+            #print("temp: " + str(temp))
             if temp > result:
                 result = temp
 
@@ -68,30 +68,30 @@ def scenic_score(input, row, col):
     h = input[row][col]
     
     up = 0
-    for r in range(row, 0, -1):
+    for r in range(row-1, 0-1, -1):
         up+=1
         if input[r][col] >= h:
             break
     
     left = 0
-    for c in range(col, 0, -1):
+    for c in range(col-1, 0-1, -1):
         left+=1
         if input[row][c] >= h:
             break
 
     down = 0
-    for r in range(row, size, 1):
+    for r in range(row+1, size, 1):
         down+=1
         if input[r][col] >= h:
             break
     
     right = 0
-    for c in range(col, size, 1):
+    for c in range(col+1, size, 1):
         right+=1
         if input[row][c] >= h:
             break
     
-    print(str(up) + "*" + str(left) + "*" + str(down) + "*" + str(right))
+    # print(str(up) + "*" + str(left) + "*" + str(down) + "*" + str(right))
     return up*right*down*left
 
 if __name__ == "__main__":
