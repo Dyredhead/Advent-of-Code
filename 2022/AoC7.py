@@ -1,45 +1,98 @@
 from collections import deque
+tree = {}
 cwd = deque()
-tree = []
+cwd.append(tree)
 
-def main(n) -> None:
+counter = 0
+min_size = 70000000
+
+def main() -> None:
     input = ""
     with open("input7.txt", 'r') as f:
-        input = f.read().strip().splitlines()
+        input = f.read().strip().split("$")
+    for i, e in enumerate(input):
+       input[i] = e.splitlines() 
 
-    for i, c in enumerate(input):
-        c = c.split(" ")
+    # print(f"input: {input}")
+    i = 2
+    while (i < len(input)):
+        line = input[i][0].split()
+        # print(f"line: {line}")
 
-        if c[0] == "$":
-            dir = c[2]
-            if c[1] == "cd":
-                cd(dir)
-            if c[1] == "ls":
-                ls(i, dir) 
+        if line[0] == "cd":
+            dir = line[1]
+            cd(dir)
+        if line[0] == "ls":
+            ls(input[i][1:]) 
+        
+        # print(tree)
+        i += 1
+    
+    cwd = deque()
+    req_size = find_size(tree)
+    print(counter)
 
+    cwd = deque()
+    req_size = 30000000 - (70000000 - req_size)
+    print(req_size)
+    find_min(tree, req_size)
+    print(min_size)
 
-    result = ""
-    for stack in stacks:
-        result += stack.pop()
+    # result = ""
+    # for stack in stacks:
+    #     result += stack.pop()
 
 def cd(dir):
     if dir == "..":
-        deque.pop
+        cwd.pop()
     else:
-        deque.append(dir)
+        # print(f"cwd: {cwd[-1]}")
+        # print(f"dir: {dir}")
+        cwd.append(cwd[-1][dir])
 
-def ls(dir):
-    
-    return 
+def ls(ls):
+    # print(f"ls: {ls}")
+    for i in ls:
+        i = i.split()
+        if i[0] == "dir":
+            dir = i[1]
+            cwd[-1][dir] = {}
+        else:
+            size = int(i[0])
+            file = i[1]
+            cwd[-1][file] = size
 
-def size(i):
-    if isinstance(i, int)
-        return i
-    else:
-        sum = 0
-        for e in i:
-            sum += size(e)
-        return sum
+def find_size(tree: dict):
+    global counter
+    cwd.append(tree)
+    sum = 0
+    for i in tree:
+        e = tree[i]
+        if isinstance(e, int):
+            sum += e
+        else:
+            sum += find_size(tree[i])
+
+    cwd.pop()
+    if sum <= 100000: 
+        counter += sum
+    return sum
+
+def find_min(tree: dict, req_size: int):
+    global min_size
+    cwd.append(tree)
+    sum = 0
+    for i in tree:
+        e = tree[i]
+        if isinstance(e, int):
+            sum += e
+        else:
+            sum += find_min(tree[i], req_size)
+
+    cwd.pop()
+    if sum >= req_size:
+        min_size = min(min_size, sum)
+    return sum
 
 if __name__ == "__main__":
-	main()
+    main()
