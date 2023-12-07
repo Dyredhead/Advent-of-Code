@@ -13,14 +13,14 @@ fn pt_1() -> i32 {
 	for line in fs::read_to_string(FILE_PATH).unwrap().lines() {
 		let mut a: i32 = 0;
 		for c in line.chars() {
-			if ('0' <= c && c <= '9') {
+			if ('1' <= c && c <= '9') {
 				a = c as i32 - '0' as i32;
 				break;
 			} 
 		}
 		let mut b: i32 = 0;
 		for c in line.chars().rev() {
-			if ('0' <= c && c <= '9') {
+			if ('1' <= c && c <= '9') {
 				b = c as i32 - '0' as i32;
 				break;
 			} 

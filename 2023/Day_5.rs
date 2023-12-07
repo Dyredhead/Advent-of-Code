@@ -1,6 +1,7 @@
 use std::fs;
 use std::cmp::{min, max};
 use std::ops::Range;
+
 static FILE_PATH: &str = "Day_5.txt";
 
 fn main() {
@@ -47,7 +48,6 @@ fn pt_1() -> usize {
 		for i in 0..seeds.len() {			
 			for map in &map_type {
 				let seed = seeds[i];
-			
 				let destination = map[0];
 				let source = map[1];
 				let range = map[2];
@@ -67,13 +67,13 @@ fn pt_2() -> usize {
 	let lines = fs::read_to_string(FILE_PATH).unwrap();
 	let lines: Vec<&str> = lines.lines().collect();
 
-	let mut seeds: Vec<Range<_>> = lines[0]["seeds: ".len()..]
-										.split_ascii_whitespace()
-										.map(|x| x.parse().unwrap())
-										.collect::<Vec<_>>()
-										.windows(2)
-										.map(|x| x[0]..x[0]+x[1])
-										.collect();
+	let range_seeds: Vec<Range<usize>> = lines[0]["seeds: ".len()..]
+											.split_ascii_whitespace()
+											.map(|x| x.parse().unwrap())
+											.collect::<Vec<_>>()
+											.chunks(2)
+											.map(|x| x[0]..x[0]+x[1])
+											.collect::<Vec<Range<usize>>>();
 
 	let mut maps: Vec<Vec<[Range<usize>; 2]>> = Vec::new();
 
@@ -90,42 +90,56 @@ fn pt_2() -> usize {
 							.map(|x| x.parse().unwrap())
 							.collect();
 			
-			let map: [std::ops::Range<usize>; 2] = [(map[0]..map[0]+map[3]),(map[1]..map[1]+map[3])];
+			let map: [std::ops::Range<usize>; 2] = [(map[0]..map[0]+map[2]),(map[1]..map[1]+map[2])];
 			maps[i-1].push(map);
 		}
 	}
 
-	// println!("{:?}", maps);
-	// for i in &maps {
-		// for j in i {
-			// println!("{:?}", j);
-		// }
-		// println!("--------");
-	// }
 
-	fn contains(a: Range<usize>, b: Range<usize>) -> bool {
-		return max(a.start, b.start) <= min(a.end, b.end);
+	fn ranges(seed: &Range<usize>, source: &Range<usize>) -> [Range<usize>; 3] {
+		return [
+				Range{start: seed.start, end: source.start},
+				Range{start: max(seed.start, source.start), end: min(seed.end, source.end)},
+				Range{start: source.end, end: seed.end}
+			];
 	} 
 
+	let mut range_seeds_old: Vec<Range<usize>> = range_seeds;
 	for map_type in maps {
-		for i in 0..seeds.len() {			
-			for map in &map_type {
-				// let seed = &seeds[i*2];
-
+		let mut range_seeds_new: Vec<Range<usize>> = Vec::new();
+		for map in &map_type {
+			let mut range_seeds_next: Vec<Range<usize>> = Vec::new();
+			for range_seed in &range_seeds_old {	
+				let range_destination: &Range<usize> = &map[0];
+				let range_source: &Range<usize> = &map[1]; 
 				
-				// if max <= min && max - min {
-				// 	seeds[i] = destination + (seed - source);
-				// 	break;
-				// } 
+				let range_seed_old: &Range<usize> = &range_seed;
+				let [range_left, range_overlap, range_right] = ranges(range_seed_old, range_source);
+				if !range_overlap.is_empty() {
+					// offset needed because the overlap may start in the center of the source range, rather than at the start.
+					let offset: usize = range_overlap.start - range_source.start;
+					let size: usize = range_overlap.end - range_overlap.start;
+					let range_seed_new: Range<usize> = Range{start: range_destination.start+offset, end: range_destination.start+offset+size};
+					range_seeds_new.push(range_seed_new);
+					
+					if !range_left.is_empty() {	range_seeds_next.push(range_left.clone()); }
+					if !range_right.is_empty() { range_seeds_next.push(range_right.clone()); }
+										
+				} else { range_seeds_next.push(range_seed_old.clone()); }
 			}
+			range_seeds_old = range_seeds_next.clone();
 		}
+		// needed to account for any seeds not being mapped, thus carrying over with the same value as before
+		range_seeds_new.append(&mut range_seeds_old);
+		range_seeds_old = range_seeds_new.clone();
 	}
-	
-	let mut min = seeds[0].start;
-	for i in seeds {
-		if i.start < min { 
-			min = i.start;
-		}
+	let range_seeds = range_seeds_old;
+	// println!("{:?}", range_seeds);
+	let mut min = range_seeds[0].start;
+	// range_seeds.into_iter().map(|range| {if range.start < min { min = range.start;}});
+	for i in range_seeds {
+		if i.start < min { min = i.start; }
 	}
 	return min;
+	// return 0;
 }
