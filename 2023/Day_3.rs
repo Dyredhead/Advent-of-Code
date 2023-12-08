@@ -9,12 +9,6 @@ fn main() {
 	println!("{}", pt_2());
 }
 
-fn print_array_2d<T: std::fmt::Debug>(array: &Vec<Vec<T>>) {
-	for row in array {
-		println!("{:?}", row);
-	} println!("");
-}
-
 fn pt_1() -> i32 {
 	fn find_symbol(engine: &Vec<Vec<char>>) -> Option<(usize, usize)> {
 		for i in 0..engine.len() {
