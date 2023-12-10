@@ -3,7 +3,7 @@ advent_of_code::solution!(%DAY_NUMBER%);
 
 
 pub fn part_one(input: &str) -> Option<usize> {
-    let lines: Vec<&str> = input.lines().collect::<Vec<&str>>().into_iter();
+    let lines = input.lines().collect::<Vec<&str>>().into_iter();
     
     
 
@@ -11,7 +11,7 @@ pub fn part_one(input: &str) -> Option<usize> {
 }
 
 pub fn part_two(input: &str) -> Option<usize> {
-    let lines: Vec<&str> = input.lines().collect::<Vec<&str>>().into_iter();
+    let lines = input.lines().collect::<Vec<&str>>().into_iter();
     
     
     

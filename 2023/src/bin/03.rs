@@ -8,8 +8,8 @@ fn get_neighbors(engine: &Vec<Vec<char>>, center: (usize, usize)) -> Vec<(usize,
     let max_col = engine[0].len();
     let i = center.0;
     let j = center.1;
-    for y in max(0, i - 1)..min(i + 1, max_row) + 1 {
-        for x in max(0, j - 1)..min(j + 1, max_col) + 1 {
+    for y in max(0, i - 1)..=min(i + 1, max_row) {
+        for x in max(0, j - 1)..=min(j + 1, max_col) {
             if (y != i || x != j) && engine[y][x].is_ascii_digit() {
                 neighbors.push((y, x));
             }

@@ -1,4 +1,4 @@
-# 🎄 Advent of Code 🎄
+# 🎄 [Advent of Code](https://adventofcode.com/) 🎄
 
 |    Year 📅    |    Stars ⭐     | Language  |
 | :-----------: | :-------------: | :-------: |
@@ -32,7 +32,7 @@
 
 |             Day 📅              | Part 1 | Time 🕗 | Part 2 | Time 🕗 |
 | :-----------------------------: | :----: | :-----: | :----: | :-----: |
-|  [1](/2023/solutions/Day_1.rs)  |   ✅   | 24.5µs  |   ✅   |  1.5ms  |
+|  [1](/2023/solutions/Day_1.rs)  |   ✅   | 34.5µs  |   ✅   |  1.5ms  |
 |  [2](/2023/solutions/Day_2.rs)  |   ✅   | 80.0µs  |   ✅   | 133.1µs |
 |  [3](/2023/solutions/Day_3.rs)  |   ✅   | 16.0ms  |   ✅   |  3.0ms  |
 |  [4](/2023/solutions/Day_4.rs)  |   ✅   | 178.7µs |   ✅   | 180.4µs |

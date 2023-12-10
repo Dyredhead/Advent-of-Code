@@ -36,43 +36,28 @@ pub fn part_two(input: &str) -> Option<usize> {
     ]);
 
     let sum: usize = input.lines().fold(0, |sum: usize, line: &str| {
-        let mut min_key: &str = "";
-        let mut min_index: usize = line.len() as usize;
-        for key in map.keys() {
-            let index: usize;
-            match line.find(key) {
-                None => {
-                    continue;
-                }
-                Some(i) => {
-                    index = i as usize;
-                }
-            }
-            if index < min_index {
-                min_index = index;
-                min_key = key;
-            }
-        }
-        let a: usize = *map.get(min_key).unwrap();
+        let (key_min, _): (&str, usize) =
+            map.keys()
+                .fold(("", line.len()), |(key_min, index_min), key| {
+                    let index: Option<usize> = line.find(key);
+                    if index.is_some_and(|index| index < index_min) {
+                        return (key, index.unwrap());
+                    }
 
-        let mut max_key: &str = "";
-        let mut max_index: i32 = -1;
-        for key in map.keys() {
-            let index: i32;
-            match line.rfind(key) {
-                None => {
-                    continue;
-                }
-                Some(i) => {
-                    index = i as i32;
-                }
+                    return (key_min, index_min);
+                });
+
+        let a: usize = *map.get(key_min).unwrap();
+
+        let (key_max, _): (&str, i32) = map.keys().fold(("", -1), |(key_max, index_max), key| {
+            let index: Option<usize> = line.rfind(key);
+            if index.is_some_and(|index| index as i32 > index_max) {
+                return (key, index.unwrap() as i32);
             }
-            if index > max_index {
-                max_index = index;
-                max_key = key;
-            }
-        }
-        let b: usize = *map.get(max_key).unwrap();
+
+            return (key_max, index_max);
+        });
+        let b: usize = *map.get(key_max).unwrap();
 
         return sum + a * 10 + b;
     });
