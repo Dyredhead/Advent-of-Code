@@ -1,6 +1,5 @@
 advent_of_code::solution!(10);
 // Imports
-use std::cmp::{max, min};
 use std::collections::HashMap;
 
 fn get_next(
