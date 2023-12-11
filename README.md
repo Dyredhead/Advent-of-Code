@@ -22,4 +22,4 @@
 | [2020](/tree/main/2020/README.md) |  $\frac{}{50}$  |    ?     |
 | [2021](/tree/main/2021/README.md) |  $\frac{}{50}$  |    ?     |
 | [2022](/tree/main/2022/README.md) |  $\frac{}{50}$  |    ?     |
-| [2023](/tree/main/2023/README.md) | $\frac{20}{50}$ | Rust 🦀  |
+| [2023](tree/main/2023/README.md)  | $\frac{20}{50}$ | Rust 🦀  |
