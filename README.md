@@ -22,4 +22,4 @@
 | [2020](../blob/main/2020/README.md) |  $\frac{}{50}$  |    ?     |
 | [2021](../blob/main/2021/README.md) |  $\frac{}{50}$  |    ?     |
 | [2022](../blob/main/2022/README.md) |  $\frac{}{50}$  |    ?     |
-| [2023](../blob/main/2023/README.md) | $\frac{20}{50}$ | Rust 🦀  |
+| [2023](2023/README.md)              | $\frac{20}{50}$ | Rust 🦀  |
