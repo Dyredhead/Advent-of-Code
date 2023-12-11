@@ -67,7 +67,7 @@ pub fn part_one(input: &str) -> Option<usize> {
 
     let start: (usize, usize) = (row.unwrap(), col.unwrap());
     let mut visited: Vec<(usize, usize)> = Vec::from([start]);
-    // TODO dynamicly find pointer
+    // TODO dynamically find pointer
     let mut p = (69, 89);
     let mut pp = start;
     while p != start {
