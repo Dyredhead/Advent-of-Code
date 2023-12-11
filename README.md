@@ -14,7 +14,7 @@
 
 |               Year 📅               |    Stars ⭐     | Language |
 | :---------------------------------: | :-------------: | :------: |
-| [2015](../blob/main/2015/README.md) |  $\frac{}{50}$  |    ?     |
+| [2015](2015/README.md)              |  $\frac{}{50}$  |    ?     |
 | [2016](../blob/main/2016/README.md) |  $\frac{}{50}$  |    ?     |
 | [2017](../blob/main/2017/README.md) |  $\frac{}{50}$  |    ?     |
 | [2018](../blob/main/2018/README.md) |  $\frac{}{50}$  |    ?     |
