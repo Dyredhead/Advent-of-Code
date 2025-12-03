@@ -1,4 +1,4 @@
-use std::ops::RangeInclusive;
+use std::{collections::HashSet, ops::RangeInclusive};
 
 advent_of_code::solution!(2);
 
@@ -71,13 +71,39 @@ pub fn part_two(input: &str) -> Option<u64> {
     let mut invalid_ids_sum = 0;
 
     for range in ranges {
-        for id in range {
-            let digits = digits(id);
-            for j in 1..((digits / 2) + 1) {
-                if digits % j == 0 {
-                    if id == repeat(first_n_digits_of_number(id, j), digits / j) {
+        let digit_count_range =
+            RangeInclusive::new(count_digits(*range.start()), count_digits(*range.end()));
+        let mut hash_set = HashSet::<usize>::new();
+        for digit_count in digit_count_range.clone().into_iter() {
+            let mut seed = 1;
+            loop {
+                if count_digits(seed) > digit_count / 2 {
+                    break;
+                }
+
+                // if the seed_digits cant perfectly fit into digit_count, then a repeating number is not possible
+                let seed_digit_count = count_digits(seed);
+                if digit_count % seed_digit_count != 0 {
+                    seed += 1;
+                    continue;
+                }
+
+                let repetitions = digit_count / seed_digit_count;
+                let id = repeat(seed, repetitions);
+
+                if hash_set.contains(&id) {
+                    seed += 1;
+                } else {
+                    if range.contains(&id) {
                         invalid_ids_sum += id;
-                        break;
+                        hash_set.insert(id);
+                        seed += 1;
+                    } else if id > *range.end() {
+                        seed = 10_usize.pow(count_digits(seed) as u32);
+                        // maybe could be improved but the below wont work since it can skip some numbers
+                        // seed = first_n_digits_of_number(*range.start(), count_digits(seed) + 1);
+                    } else {
+                        seed += 1;
                     }
                 }
             }
@@ -87,11 +113,11 @@ pub fn part_two(input: &str) -> Option<u64> {
     return Some(invalid_ids_sum as u64);
 }
 
-fn digits(n: usize) -> usize {
-    if n == 1 {
+fn count_digits(number: usize) -> usize {
+    if number == 1 {
         return 1;
     }
-    let log = (n as f32).log10();
+    let log = (number as f32).log10();
     let digits = log.ceil() as usize;
     if log.fract() == 0_f32 {
         return digits + 1;
@@ -99,17 +125,11 @@ fn digits(n: usize) -> usize {
     return digits;
 }
 
-fn first_n_digits_of_number(number: usize, n: usize) -> usize {
-    let digits = digits(number);
-    let first_n_digits = number / 10_usize.pow((digits - n) as u32);
-    return first_n_digits;
-}
-
-fn repeat(n: usize, times: usize) -> usize {
-    let digits = digits(n);
+fn repeat(number: usize, repetitions: usize) -> usize {
+    let digit_count = count_digits(number);
     let mut sum: usize = 0;
-    for i in 0..times {
-        sum += n * 10_usize.pow((i * digits) as u32);
+    for i in 0..repetitions {
+        sum += number * 10_usize.pow((i * digit_count) as u32);
     }
     return sum;
 }
