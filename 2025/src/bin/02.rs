@@ -71,12 +71,12 @@ pub fn part_two(input: &str) -> Option<u64> {
     let mut invalid_ids_sum = 0;
 
     for range in ranges {
-        for i in range {
-            let i_str = i.to_string();
-            for j in 1..((i_str.len() / 2) + 1) {
-                if i_str.len() % j == 0 {
-                    if i_str == i_str[..j].repeat(i_str.len() / j) {
-                        invalid_ids_sum += i;
+        for id in range {
+            let digits = digits(id);
+            for j in 1..((digits / 2) + 1) {
+                if digits % j == 0 {
+                    if id == repeat(first_n_digits_of_number(id, j), digits / j) {
+                        invalid_ids_sum += id;
                         break;
                     }
                 }
@@ -85,6 +85,33 @@ pub fn part_two(input: &str) -> Option<u64> {
     }
 
     return Some(invalid_ids_sum as u64);
+}
+
+fn digits(n: usize) -> usize {
+    if n == 1 {
+        return 1;
+    }
+    let log = (n as f32).log10();
+    let digits = log.ceil() as usize;
+    if log.fract() == 0_f32 {
+        return digits + 1;
+    }
+    return digits;
+}
+
+fn first_n_digits_of_number(number: usize, n: usize) -> usize {
+    let digits = digits(number);
+    let first_n_digits = number / 10_usize.pow((digits - n) as u32);
+    return first_n_digits;
+}
+
+fn repeat(n: usize, times: usize) -> usize {
+    let digits = digits(n);
+    let mut sum: usize = 0;
+    for i in 0..times {
+        sum += n * 10_usize.pow((i * digits) as u32);
+    }
+    return sum;
 }
 
 #[cfg(test)]
