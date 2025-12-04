@@ -20,17 +20,19 @@ pub fn part_two(input: &str) -> Option<u64> {
     let mut sum: usize = 0;
     for line in input.lines() {
         let mut index = 0;
-        let mut num = String::new();
+        // let mut num = String::with_capacity(12);
         for i in (1..=12).rev() {
             let (max_index, max) = line[index..=line.len() - i]
                 .char_indices()
                 .first_max_by_key(|(_, value)| *value)
                 .unwrap();
             index += max_index + 1;
-            num.push(max);
+            // num.push(max);
+            let max = max as u8 - b'0';
+            sum += max as usize * 10_usize.pow(i as u32 - 1);
         }
-        let num = num.parse::<usize>().unwrap();
-        sum += num;
+        // let num = num.parse::<usize>().unwrap();
+        // sum += num;
     }
     return Some(sum as u64);
 }
