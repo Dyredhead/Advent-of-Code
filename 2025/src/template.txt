@@ -1,11 +1,13 @@
 advent_of_code::solution!(%DAY_NUMBER%);
 
-pub fn part_one(input: &str) -> Option<u64> {
-    None
+pub fn part_one(input: &str) -> usize {
+    todo!();
+    return usize::try_from(_).unwrap();
 }
 
-pub fn part_two(input: &str) -> Option<u64> {
-    None
+pub fn part_two(input: &str) -> usize {
+    todo!();
+    return usize::try_from(_).unwrap();
 }
 
 #[cfg(test)]
