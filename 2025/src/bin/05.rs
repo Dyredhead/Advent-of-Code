@@ -3,7 +3,7 @@
 #![feature(range_bounds_is_empty)]
 use std::{
     cmp::{max, min},
-    collections::{HashSet, hash_set},
+    collections::HashSet,
     iter::Empty,
     mem::swap,
     ops::{Bound, IntoBounds, RangeBounds},
@@ -53,87 +53,32 @@ pub fn part_two(input: &str) -> Option<u64> {
         })
         .collect();
 
-    // let mut final_ranges: HashSet<RangeInclusive<usize>> = HashSet::new();
-    loop {
-        let mut new_ranges: HashSet<RangeInclusive<usize>> = HashSet::new();
-        for (i, a) in ranges.iter().enumerate() {
-            // let mut flag_disjoint_from_all = true;
-            // let mut flag_always_a_subset = true;
-            for (j, b) in ranges.iter().enumerate() {
-                if i == j {
-                    continue;
-                }
-
-                let intersection = a.intersect(*b);
-                if !intersection.is_empty() {
-                    let start = min(a.start, b.start);
-                    let last = max(a.last, b.last);
-
-                    if let Bound::Included(c) = intersection.0
-                        && let Bound::Included(d) = intersection.1
-                    {
-                        let left = RangeInclusive { start, last: c };
-                        if !left.is_empty() {
-                            new_ranges.insert(left);
-                        }
-
-                        let middle = RangeInclusive {
-                            start: c + 1,
-                            last: d - 1,
-                        };
-                        if !middle.is_empty() {
-                            new_ranges.insert(middle);
-                        }
-
-                        let right = RangeInclusive { start: d, last };
-                        if !right.is_empty() {
-                            new_ranges.insert(right);
-                        }
-                    }
-                }
-
-                //     let diff = range_diffrence(*b, *a);
-                //     match diff {
-                //         SetDiffrence::Empty => {
-                //             flag_disjoint_from_all = false;
-                //             flag_always_a_subset = false;
-                //         }
-                //         SetDiffrence::CompletelyDisjoint(_) => {
-                //             flag_always_a_subset = false;
-                //         }
-                //         SetDiffrence::PartiallyDisjoint(lhs, rhs) => {
-                //             new_ranges.insert(lhs);
-                //             new_ranges.insert(rhs);
-                //             flag_disjoint_from_all = false;
-                //             flag_always_a_subset = false;
-                //         }
-                //         SetDiffrence::Subset(lhs, rhs) => {
-                //             if let Some(lhs) = lhs {
-                //                 new_ranges.insert(lhs);
-                //             }
-                //             if let Some(rhs) = rhs {
-                //                 new_ranges.insert(rhs);
-                //             }
-                //             flag_disjoint_from_all = false;
-                //         }
-                //     }
-                // }
-                // if flag_disjoint_from_all || flag_always_a_subset {
-                //     final_ranges.insert(*a);
-                // }
-            }
-
-            dbg!(&ranges);
-            // if new_ranges.is_empty() {
-            //     break;
-            // } else {
-            // }
+    let mut disjoint_ranges: HashSet<RangeInclusive<usize>> = HashSet::new();
+    for range in ranges {
+        if disjoint_ranges.is_empty() {
+            disjoint_ranges.insert(range);
+            continue;
         }
-        ranges = new_ranges;
+
+        let mut to_insert: Vec<RangeInclusive<usize>>;
+        let mut to_remove: Vec<RangeInclusive<usize>>;
+
+        let mut flag_disjoint_from_all = true;
+        for disjoint_range in disjoint_ranges.iter() {
+            if disjoint_range.intersect(range).is_empty() {
+                continue;
+            }
+            flag_disjoint_from_all = false
+        }
+        disjoint_ranges.insert(range);
     }
-    dbg!(&ranges);
-    let count = ranges.iter().fold(0, |acc, range| acc + len(range));
-    return Some(u64::try_from(count).unwrap());
+    // dbg!(disjoint_ranges);
+
+    let disjoint_ranges = Vec::from_iter(disjoint_ranges);
+    // .sort_by(|a, b| a.start.cmp(&b.start));
+    dbg!(disjoint_ranges);
+
+    todo!();
 }
 
 #[derive(Eq, PartialEq)]
