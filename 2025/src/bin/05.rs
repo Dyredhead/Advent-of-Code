@@ -2,6 +2,10 @@
 #![feature(range_into_bounds)]
 #![feature(range_bounds_is_empty)]
 use std::{
+    cmp::{max, min},
+    collections::{HashSet, hash_set},
+    iter::Empty,
+    mem::swap,
     ops::{Bound, IntoBounds, RangeBounds},
     range::RangeInclusive,
 };
@@ -38,7 +42,7 @@ pub fn part_one(input: &str) -> Option<u64> {
 
 pub fn part_two(input: &str) -> Option<u64> {
     let input = input.split_once("\n\n").unwrap();
-    let ranges: Vec<_> = input
+    let mut ranges: HashSet<_> = input
         .0
         .lines()
         .map(|range| {
@@ -49,14 +53,156 @@ pub fn part_two(input: &str) -> Option<u64> {
         })
         .collect();
 
-    let mut count: isize = 0;
-    for (index, range1) in ranges.iter().enumerate() {
-        count += len(range1) as isize;
-        for range2 in ranges.iter().skip(index + 1) {
-            count -= len_intersection(range1, range2) as isize;
+    // let mut final_ranges: HashSet<RangeInclusive<usize>> = HashSet::new();
+    loop {
+        let mut new_ranges: HashSet<RangeInclusive<usize>> = HashSet::new();
+        for (i, a) in ranges.iter().enumerate() {
+            // let mut flag_disjoint_from_all = true;
+            // let mut flag_always_a_subset = true;
+            for (j, b) in ranges.iter().enumerate() {
+                if i == j {
+                    continue;
+                }
+
+                let intersection = a.intersect(*b);
+                if !intersection.is_empty() {
+                    let start = min(a.start, b.start);
+                    let last = max(a.last, b.last);
+
+                    if let Bound::Included(c) = intersection.0
+                        && let Bound::Included(d) = intersection.1
+                    {
+                        let left = RangeInclusive { start, last: c };
+                        if !left.is_empty() {
+                            new_ranges.insert(left);
+                        }
+
+                        let middle = RangeInclusive {
+                            start: c + 1,
+                            last: d - 1,
+                        };
+                        if !middle.is_empty() {
+                            new_ranges.insert(middle);
+                        }
+
+                        let right = RangeInclusive { start: d, last };
+                        if !right.is_empty() {
+                            new_ranges.insert(right);
+                        }
+                    }
+                }
+
+                //     let diff = range_diffrence(*b, *a);
+                //     match diff {
+                //         SetDiffrence::Empty => {
+                //             flag_disjoint_from_all = false;
+                //             flag_always_a_subset = false;
+                //         }
+                //         SetDiffrence::CompletelyDisjoint(_) => {
+                //             flag_always_a_subset = false;
+                //         }
+                //         SetDiffrence::PartiallyDisjoint(lhs, rhs) => {
+                //             new_ranges.insert(lhs);
+                //             new_ranges.insert(rhs);
+                //             flag_disjoint_from_all = false;
+                //             flag_always_a_subset = false;
+                //         }
+                //         SetDiffrence::Subset(lhs, rhs) => {
+                //             if let Some(lhs) = lhs {
+                //                 new_ranges.insert(lhs);
+                //             }
+                //             if let Some(rhs) = rhs {
+                //                 new_ranges.insert(rhs);
+                //             }
+                //             flag_disjoint_from_all = false;
+                //         }
+                //     }
+                // }
+                // if flag_disjoint_from_all || flag_always_a_subset {
+                //     final_ranges.insert(*a);
+                // }
+            }
+
+            dbg!(&ranges);
+            // if new_ranges.is_empty() {
+            //     break;
+            // } else {
+            // }
         }
+        ranges = new_ranges;
     }
+    dbg!(&ranges);
+    let count = ranges.iter().fold(0, |acc, range| acc + len(range));
     return Some(u64::try_from(count).unwrap());
+}
+
+#[derive(Eq, PartialEq)]
+enum SetDiffrence {
+    Empty,
+    PartiallyDisjoint(RangeInclusive<usize>, RangeInclusive<usize>),
+    CompletelyDisjoint(RangeInclusive<usize>),
+    Subset(Option<RangeInclusive<usize>>, Option<RangeInclusive<usize>>),
+}
+
+fn range_diffrence(lhs: RangeInclusive<usize>, rhs: RangeInclusive<usize>) -> SetDiffrence {
+    if lhs == rhs {
+        return SetDiffrence::Empty;
+    }
+
+    if rhs.start <= lhs.start && lhs.last <= rhs.last {
+        // swap(&mut lhs, &mut rhs);
+        return SetDiffrence::Empty;
+    }
+
+    if lhs.intersect(rhs).is_empty() {
+        return SetDiffrence::CompletelyDisjoint(lhs);
+    } else if lhs.start <= rhs.start && rhs.last <= lhs.last {
+        let left = RangeInclusive {
+            start: lhs.start,
+            last: rhs.start - 1,
+        };
+
+        let right = RangeInclusive {
+            start: rhs.last + 1,
+            last: lhs.last,
+        };
+
+        return SetDiffrence::Subset(
+            if !left.is_empty() { Some(left) } else { None },
+            if !right.is_empty() { Some(right) } else { None },
+        );
+    } else {
+        return SetDiffrence::PartiallyDisjoint(
+            RangeInclusive {
+                start: min(lhs.start, rhs.start),
+                last: max(lhs.start, rhs.start),
+            },
+            RangeInclusive {
+                start: min(lhs.last, rhs.last),
+                last: max(lhs.last, rhs.last),
+            },
+        );
+    }
+
+    // else if rhs.start <= lhs.start && rhs.last <= lhs.last {
+    //     return (SetDiffrence::PartiallyDisjoint(
+    //         RangeInclusive {
+    //             start: rhs.start,
+    //             last: lhs.start,
+    //         },
+    //         RangeInclusive {
+    //             start: rhs.last,
+    //             last: lhs.last,
+    //         },
+    //     ));
+    // } else if lhs.start <= rhs.start && lhs.last <= rhs.last {
+    //     return SetDiffrence::PartiallyDisjoint(RangeInclusive {
+    //         start: lhs.start,
+    //         last: rhs.start,
+    //     });
+    // } else {
+    //     unreachable!()
+    // }
 }
 
 fn len(range: &RangeInclusive<usize>) -> usize {
@@ -65,23 +211,6 @@ fn len(range: &RangeInclusive<usize>) -> usize {
         return 0;
     } else {
         return range.last - range.start + 1;
-    }
-}
-
-fn len_intersection(a: &RangeInclusive<usize>, b: &RangeInclusive<usize>) -> usize {
-    let intersection = a.intersect(*b);
-
-    if intersection.is_empty() {
-        return 0;
-    } else {
-        if let Bound::Included(start) = intersection.0
-            && let Bound::Included(last) = intersection.1
-        {
-            assert!(last >= start);
-            return last - start + 1;
-        } else {
-            unreachable!()
-        }
     }
 }
 
