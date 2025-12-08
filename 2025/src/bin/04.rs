@@ -1,5 +1,3 @@
-use std::{clone, fmt::Debug};
-
 advent_of_code::solution!(4);
 
 pub fn part_one(input: &str) -> Option<u64> {
@@ -75,12 +73,6 @@ pub fn part_two(input: &str) -> Option<u64> {
     }
 
     return Some(counter);
-}
-
-fn print_2dvec<T: Debug>(grid: &Vec<Vec<T>>) {
-    grid.iter().for_each(|it| {
-        println!("{:?}", it);
-    })
 }
 
 #[cfg(test)]

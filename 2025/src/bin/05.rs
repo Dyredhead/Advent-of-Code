@@ -4,7 +4,7 @@
 use std::{
     collections::BTreeSet,
     fmt::Debug,
-    ops::{Bound, Deref, IntoBounds, RangeBounds},
+    ops::{Deref, IntoBounds, RangeBounds},
     range::RangeInclusive,
 };
 
