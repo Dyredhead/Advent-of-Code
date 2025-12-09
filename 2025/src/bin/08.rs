@@ -1,10 +1,11 @@
+advent_of_code::solution!(8);
+
 use std::{
     cmp::{max, min},
     collections::{HashMap, HashSet},
     fmt::{Debug, Display},
+    vec,
 };
-
-advent_of_code::solution!(8);
 
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 struct JunctionBox {
@@ -61,35 +62,20 @@ pub fn part_one(input: &str) -> Option<usize> {
 
     println!("map: {:?}\n", &map);
 
-    let mut dp: HashSet<(JunctionBox, JunctionBox)> = HashSet::new();
-    for _ in 0..7 {
-        // maybe causes problem since what if these are the min
-        // let mut min_junction_boxes = (junction_boxes[0], junction_boxes[1]);
-        // let mut min_distance = distance(min_junction_boxes.0, min_junction_boxes.1);
-        let mut min_junction_boxes = None;
-        let mut min_distance = None;
-        for (i, &a) in junction_boxes.iter().enumerate() {
-            for &b in junction_boxes.iter().skip(i + 1) {
-                if a == b || map.get(&a).unwrap().contains(&b) {
-                    continue;
-                }
+    let mut pairs: Vec<(JunctionBox, JunctionBox, f32)> =
+        Vec::with_capacity(junction_boxes.len().pow(2) / 2);
 
-                let distance = distance(a, b);
-                if min_distance.is_none() || distance < min_distance.unwrap() {
-                    min_distance = Some(distance);
-                    min_junction_boxes = Some((a, b));
-                }
-            }
+    for (i, &a) in junction_boxes.iter().enumerate() {
+        for &b in junction_boxes.iter().skip(i + 1) {
+            pairs.push((a, b, distance(a, b)));
         }
-        // println!("map before: {:#?}", &map);
+    }
 
-        let min_junction_boxes = min_junction_boxes.unwrap();
-        dp.insert(min_junction_boxes);
-        let a = min_junction_boxes.0;
-        let b = min_junction_boxes.1;
+    pairs.sort_by(|a, b| a.2.partial_cmp(&b.2).unwrap());
 
-        // println!("a: {a:?}");
-        // println!("b: {b:?}");
+    for pair in pairs.into_iter().take(10 - 1) {
+        let a = pair.0;
+        let b = pair.1;
 
         let circuit_a = map.get(&a).unwrap().clone();
         let circuit_b = map.get(&b).unwrap().clone();
@@ -117,13 +103,10 @@ pub fn part_one(input: &str) -> Option<usize> {
 
         assert!(circuits.remove(&circuit_a));
         assert!(circuits.remove(&circuit_b));
-
-        // println!("map after: {:#?}", &map);
-        // println!();
     }
-    for (i, circuit) in circuits.clone().iter().enumerate() {
-        println!("{i} (len: {}): {:?}", circuit.len(), circuit);
-    }
+    // for (i, circuit) in circuits.clone().iter().enumerate() {
+    //     println!("{i} (len: {}): {:?}", circuit.len(), circuit);
+    // }
 
     let mut product = 1;
     for _ in 0..3 {
