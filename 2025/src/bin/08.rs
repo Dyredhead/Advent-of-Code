@@ -32,7 +32,7 @@ fn distance(a: JunctionBox, b: JunctionBox) -> f32 {
     let delta_x = max(a.x, b.x) - min(a.x, b.x);
     let delta_y = max(a.y, b.y) - min(a.y, b.y);
     let delta_z = max(a.z, b.z) - min(a.z, b.z);
-    return f32::sqrt((delta_x * delta_x + delta_y * delta_y + delta_z * delta_z) as f32);
+    return f32::sqrt((delta_x.pow(2) + delta_y.pow(2) + delta_z.pow(2)) as f32);
 }
 
 pub fn part_one(input: &str) -> Option<usize> {
@@ -53,14 +53,14 @@ pub fn part_one(input: &str) -> Option<usize> {
         .map(|&junction_box| Circuit::from([junction_box]))
         .collect();
 
-    println!("circuits: {:?}\n", &circuits);
+    // println!("circuits: {:?}\n", &circuits);
 
     let mut map: HashMap<JunctionBox, Circuit> = junction_boxes
         .iter()
         .map(|junction_box| (*junction_box, Circuit::from([*junction_box])))
         .collect();
 
-    println!("map: {:?}\n", &map);
+    // println!("map: {:?}\n", &map);
 
     let mut pairs: Vec<(JunctionBox, JunctionBox, f32)> =
         Vec::with_capacity(junction_boxes.len().pow(2) / 2);
@@ -70,10 +70,18 @@ pub fn part_one(input: &str) -> Option<usize> {
             pairs.push((a, b, distance(a, b)));
         }
     }
-
     pairs.sort_by(|a, b| a.2.partial_cmp(&b.2).unwrap());
+    // println!("pairs: {:?}\n", &pairs);
+    let mut pairs = pairs.into_iter();
 
-    for pair in pairs.into_iter().take(10 - 1) {
+    let mut counter = 0;
+    while counter < 1000 - 1 {
+        let pair = pairs.next().unwrap();
+
+        if map.get(&pair.0).unwrap().contains(&pair.1) {
+            continue;
+        }
+
         let a = pair.0;
         let b = pair.1;
 
@@ -103,6 +111,8 @@ pub fn part_one(input: &str) -> Option<usize> {
 
         assert!(circuits.remove(&circuit_a));
         assert!(circuits.remove(&circuit_b));
+
+        counter += 1;
     }
     // for (i, circuit) in circuits.clone().iter().enumerate() {
     //     println!("{i} (len: {}): {:?}", circuit.len(), circuit);
