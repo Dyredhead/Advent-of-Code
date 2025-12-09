@@ -4,7 +4,6 @@ use std::{
     cmp::{max, min},
     collections::{HashMap, HashSet},
     fmt::{Debug, Display},
-    vec,
 };
 
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
@@ -53,14 +52,10 @@ pub fn part_one(input: &str) -> Option<usize> {
         .map(|&junction_box| Circuit::from([junction_box]))
         .collect();
 
-    // println!("circuits: {:?}\n", &circuits);
-
     let mut map: HashMap<JunctionBox, Circuit> = junction_boxes
         .iter()
         .map(|junction_box| (*junction_box, Circuit::from([*junction_box])))
         .collect();
-
-    // println!("map: {:?}\n", &map);
 
     let mut pairs: Vec<(JunctionBox, JunctionBox, f32)> =
         Vec::with_capacity(junction_boxes.len().pow(2) / 2);
@@ -71,11 +66,11 @@ pub fn part_one(input: &str) -> Option<usize> {
         }
     }
     pairs.sort_by(|a, b| a.2.partial_cmp(&b.2).unwrap());
-    // println!("pairs: {:?}\n", &pairs);
     let mut pairs = pairs.into_iter();
 
     let mut counter = 0;
     while counter < 1000 - 1 {
+        counter += 1;
         let pair = pairs.next().unwrap();
 
         if map.get(&pair.0).unwrap().contains(&pair.1) {
@@ -88,20 +83,11 @@ pub fn part_one(input: &str) -> Option<usize> {
         let circuit_a = map.get(&a).unwrap().clone();
         let circuit_b = map.get(&b).unwrap().clone();
 
-        // println!("Before");
-        // println!("circuit_a: {:?}", &circuit_a);
-        // println!("circuit_b: {:?}", &circuit_b);
-
         let new_circuit: Circuit = circuit_a
             .iter()
             .chain(circuit_b.iter())
             .map(|j| *j)
             .collect();
-
-        // println!("After:");
-        // println!("circuit_a: {:?}", &circuit_a);
-        // println!("circuit_b: {:?}", &circuit_b);
-        // println!("new_circuit: {:?}", &new_circuit);
 
         assert!(circuits.insert(new_circuit.clone()));
         // let new_circuit = circuits.get(&new_circuit).unwrap();
@@ -111,23 +97,15 @@ pub fn part_one(input: &str) -> Option<usize> {
 
         assert!(circuits.remove(&circuit_a));
         assert!(circuits.remove(&circuit_b));
-
-        counter += 1;
     }
-    // for (i, circuit) in circuits.clone().iter().enumerate() {
-    //     println!("{i} (len: {}): {:?}", circuit.len(), circuit);
-    // }
 
-    let mut product = 1;
-    for _ in 0..3 {
-        let max = circuits
-            .iter()
-            .max_by(|a, b| a.len().cmp(&b.len()))
-            .unwrap()
-            .clone();
-        product *= max.len();
-        circuits.remove(&max);
-    }
+    let mut circuits = Vec::from_iter(circuits);
+    circuits.sort_by(|a, b| a.len().cmp(&b.len()).reverse());
+
+    let product = circuits
+        .iter()
+        .take(min(circuits.len(), 3))
+        .fold(1, |acc, circuit| acc * circuit.len());
 
     return Some(product);
 }
