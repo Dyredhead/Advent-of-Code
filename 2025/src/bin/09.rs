@@ -6,6 +6,7 @@ use std::{
     ops::RangeInclusive,
 };
 
+use itertools::Itertools;
 use strum::VariantArray;
 use strum_macros::VariantArray;
 
@@ -20,7 +21,7 @@ enum Location {
 struct Point {
     x: usize,
     y: usize,
-    location: Option<Location>,
+    // location: Option<Location>,
 }
 
 impl Point {
@@ -28,17 +29,17 @@ impl Point {
         return Self {
             x,
             y,
-            location: None,
+            // location: None,
         };
     }
 
-    fn with_location(x: usize, y: usize, location: Location) -> Self {
-        return Self {
-            x,
-            y,
-            location: Some(location),
-        };
-    }
+    // fn with_location(x: usize, y: usize, location: Location) -> Self {
+    //     return Self {
+    //         x,
+    //         y,
+    //         location: Some(location),
+    //     };
+    // }
 }
 
 pub fn part_one(input: &str) -> Option<usize> {
@@ -102,26 +103,41 @@ pub fn part_two(input: &str) -> Option<usize> {
 
     input.push(*input.first().unwrap());
 
+    // get bounding box of polygon
+
+    let (min_x, max_x) = match input.iter().minmax_by(|a, b| a.x.cmp(&b.x)) {
+        itertools::MinMaxResult::NoElements => unreachable!(),
+        itertools::MinMaxResult::OneElement(_) => unreachable!(),
+        itertools::MinMaxResult::MinMax(min_x, max_x) => (min_x.x, max_x.x),
+    };
+    dbg!(min_x, max_x);
+
+    let (min_y, max_y) = match input.iter().minmax_by(|a, b| a.y.cmp(&b.y)) {
+        itertools::MinMaxResult::NoElements => unreachable!(),
+        itertools::MinMaxResult::OneElement(_) => unreachable!(),
+        itertools::MinMaxResult::MinMax(min_y, max_y) => (min_y.y, max_y.y),
+    };
+    dbg!(min_y, max_y);
+
+    let capacity = (max_x - min_x) * (max_y - min_y) / 100;
+
     // find all borders of simple polygon
-    let mut points: HashSet<Point> = HashSet::with_capacity(input.len());
+    let mut points: HashSet<Point> = HashSet::with_capacity(capacity);
     for window in input.windows(2) {
         let (a, b) = (window[0], window[1]);
         if a.x == b.x {
             let y_range = RangeInclusive::new(min(a.y, b.y), max(a.y, b.y));
             for y in y_range {
-                points.insert(Point::with_location(a.x, y, Location::Border));
+                points.insert(Point::new(a.x, y));
             }
         } else {
-            let x_range = RangeInclusive::new(min(a.y, b.y), max(a.y, b.y));
+            let x_range = RangeInclusive::new(min(a.x, b.x), max(a.x, b.x));
             for x in x_range {
-                points.insert(Point::with_location(x, a.y, Location::Border));
+                points.insert(Point::new(x, a.y));
             }
         };
     }
-
-    // get bounding box of polygon
-    let max_x = input.iter().max_by(|a, b| a.x.cmp(&b.x)).unwrap().x + 10;
-    let max_y = input.iter().max_by(|a, b| a.y.cmp(&b.y)).unwrap().y + 10;
+    dbg!();
 
     // find inner point using marching ray
     let (a, b) = (input[0], input[1]);
@@ -130,9 +146,9 @@ pub fn part_two(input: &str) -> Option<usize> {
 
         // go towards closer bound to save time
         let direction = if edge_point.y - 0 < max_y - edge_point.y {
-            Direction::Down
+            Direction::Left
         } else {
-            Direction::Up
+            Direction::Right
         };
 
         (edge_point, direction)
@@ -141,13 +157,16 @@ pub fn part_two(input: &str) -> Option<usize> {
 
         // go towards closer bound to save time
         let direction = if edge_point.x - 0 < max_x - edge_point.x {
-            Direction::Left
+            Direction::Up
         } else {
-            Direction::Right
+            Direction::Down
         };
 
         (edge_point, direction)
     };
+
+    dbg!();
+
     let mut intersections = 0;
     let mut marching_ray = edge_point;
     while 0 < marching_ray.x
@@ -167,23 +186,33 @@ pub fn part_two(input: &str) -> Option<usize> {
     } else {
         direction
     };
+    let inside_point = edge_point.shift(&direction);
 
-    let mut inside_point = edge_point.shift(&direction);
-    inside_point.location = Some(Location::Inside);
+    dbg!();
 
-    // find all points inside simple polygon using BFS
-    let mut to_visit = VecDeque::from_iter([inside_point]);
+    // find all points inside simple polygon using Flood Fill
+    let mut to_visit = VecDeque::with_capacity(capacity / 100);
+    to_visit.push_back(inside_point);
+    // let mut to_visit = VecDeque::from_iter([inside_point]);
+    points.insert(inside_point);
+    let mut n = 0;
     while !to_visit.is_empty() {
+        n += 1;
         let point = to_visit.pop_front().unwrap();
-        points.insert(point);
         for direction in Direction::VARIANTS {
-            let mut new_point = point.shift(direction);
-            new_point.location = Some(Location::Inside);
+            let new_point = point.shift(direction);
             if !points.contains(&new_point) {
                 to_visit.push_back(new_point);
+                points.insert(new_point);
             }
         }
+        if n % 1_000_000 == 0 {
+            dbg!(to_visit.len());
+        }
     }
+
+    dbg!();
+
     // TODO: possible that there could be an entierly enclosed space where the borders touch each other. Might have to scale everything up by 3x to avoid such a possibility
     //
     // for each unqiue pair of red squares:
@@ -218,6 +247,8 @@ pub fn part_two(input: &str) -> Option<usize> {
             max_area = max(max_area, area);
         }
     }
+
+    dbg!();
 
     return Some(max_area);
 }
