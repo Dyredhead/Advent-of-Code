@@ -3,7 +3,6 @@
 
 advent_of_code::solution!(9);
 
-use crate::point::{BorderLocation, Location, Point};
 use itertools::Itertools;
 use std::{
     cmp::{max, min},
@@ -11,52 +10,16 @@ use std::{
     range::Range,
 };
 
-mod point {
-    use std::collections::HashMap;
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+struct Point {
+    x: usize,
+    y: usize,
+}
 
-    #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-    pub enum BorderLocation {
-        Horizontal,
-        Vertical,
-        Corner,
+impl Point {
+    fn new(x: usize, y: usize) -> Self {
+        return Self { x, y };
     }
-
-    #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-    pub enum Location {
-        Border(BorderLocation),
-        Inside,
-        Outside,
-    }
-
-    #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
-    pub struct Point {
-        pub x: usize,
-        pub y: usize,
-    }
-
-    impl Point {
-        pub fn new(x: usize, y: usize) -> Self {
-            return Self { x, y };
-        }
-
-        pub fn with_location(
-            x: usize,
-            y: usize,
-            location: Location,
-            locations: &mut HashMap<Point, Location>,
-        ) -> Self {
-            let point = Self::new(x, y);
-            locations.insert(point, location);
-            return point;
-        }
-
-        pub fn location(&self, locations: &HashMap<Point, Location>) -> Location {
-            return *locations.get(self).unwrap();
-        }
-    }
-
-    impl !Send for Point {}
-    impl !Sync for Point {}
 }
 
 pub fn part_one(input: &str) -> Option<usize> {
@@ -82,18 +45,10 @@ pub fn part_one(input: &str) -> Option<usize> {
 }
 
 pub fn part_two(input: &str) -> Option<usize> {
-    let mut locations: HashMap<Point, Location> = HashMap::new();
     let mut input: Vec<Point> = input
         .lines()
         .map(|line| line.split_once(',').unwrap())
-        .map(|(x, y)| {
-            Point::with_location(
-                x.parse().unwrap(),
-                y.parse().unwrap(),
-                Location::Border(BorderLocation::Corner),
-                &mut locations,
-            )
-        })
+        .map(|(x, y)| Point::new(x.parse().unwrap(), y.parse().unwrap()))
         .collect();
 
     input.push(*input.first().unwrap());
@@ -102,7 +57,7 @@ pub fn part_two(input: &str) -> Option<usize> {
     let (min_x, max_x) = match input.iter().minmax_by(|a, b| a.x.cmp(&b.x)) {
         itertools::MinMaxResult::NoElements => unreachable!(),
         itertools::MinMaxResult::OneElement(_) => unreachable!(),
-        // add one to max_x.x so that if there is no edge against bounding box
+        // add one to max_x.x so that there is no edge right up against the bounding box
         itertools::MinMaxResult::MinMax(min_x, max_x) => (min_x.x, max_x.x + 1),
     };
     dbg!(min_x, max_x);
@@ -115,82 +70,72 @@ pub fn part_two(input: &str) -> Option<usize> {
     dbg!(min_y, max_y);
 
     // find all borders of simple polygon
-    let mut edge_points: HashSet<Point> = HashSet::new();
+    let mut vertical_edge_points: HashSet<Point> = HashSet::new();
+    let mut horizontal_edge_points: HashMap<Point, Point> = HashMap::new();
     for window in input.windows(2) {
         let (a, b) = (window[0], window[1]);
+        // Vertical
         if a.x == b.x {
-            for y in (min(a.y, b.y) + 1)..=(max(a.y, b.y) - 1) {
-                edge_points.insert(Point::with_location(
-                    a.x,
-                    y,
-                    Location::Border(BorderLocation::Vertical),
-                    &mut locations,
-                ));
+            for y in min(a.y, b.y)..=max(a.y, b.y) {
+                vertical_edge_points.insert(Point::new(a.x, y));
             }
-        } else {
-            for x in (min(a.x, b.x) + 1)..=(max(a.x, b.x) - 1) {
-                edge_points.insert(Point::with_location(
-                    x,
-                    a.y,
-                    Location::Border(BorderLocation::Horizontal),
-                    &mut locations,
-                ));
-            }
-        };
-        edge_points.insert(a);
-        edge_points.insert(b);
+        }
+        // Horizontal
+        else {
+            horizontal_edge_points.insert(
+                Point::new(min(a.x, b.x), a.y),
+                Point::new(max(a.x, b.x), a.y),
+            );
+        }
     }
 
+    dbg!();
+
     let sorted_edge_points = {
-        let mut edge_points = Vec::from_iter(edge_points.iter());
+        let mut edge_points = Vec::from_iter(vertical_edge_points.iter());
         edge_points.sort();
         edge_points
     };
     // dbg!(&edge_points);
 
+    dbg!(sorted_edge_points.len());
+
     let mut map: HashMap<usize, Vec<Range<usize>>> = HashMap::with_capacity(max_y - min_y);
     let mut dp: HashMap<Point, bool> = HashMap::with_capacity(sorted_edge_points.len());
+    let mut _n = 0;
     // find all inside ranges by scaning right to left
     for point in sorted_edge_points.into_iter().rev() {
-        let is_horizontal =
-            point.location(&locations) == Location::Border(BorderLocation::Horizontal);
-        let is_left_corner = point.location(&locations) == Location::Border(BorderLocation::Corner)
-            && edge_points.contains(&Point::new(point.x + 1, point.y));
-
-        if is_horizontal || is_left_corner {
-            let next_point = Point::new(point.x + 1, point.y);
-            dp.insert(*point, *dp.get(&next_point).unwrap());
-            continue;
+        if _n % 1000 == 0 {
+            dbg!(_n);
         }
-
-        dbg!(point);
+        _n += 1;
+        // dbg!(point);
         let start_x = point.x;
         let mut end_x: Option<usize> = None;
         // skip start_x since its on the edge
         for x in (start_x..=max_x).skip(1) {
             let new_point = Point::new(x, point.y);
-            if edge_points.contains(&new_point) {
+            if vertical_edge_points.contains(&new_point) {
                 end_x = Some(x);
                 break;
             }
         }
-        dbg!(end_x);
+        // dbg!(end_x);
 
         match end_x {
             None => {
                 dp.insert(*point, false);
             }
             Some(end_x) => {
-                // SAFTEY: since we are looping from right to left,
-                // if end_x is another point, then it must be in is_inside already
-                let end_point = Point::new(end_x, point.y);
-                let is_end_point_inside = dp.get(&end_point).unwrap().to_owned();
-                let is_start_point_inside =
-                    if end_point.location(&locations) == Location::Border(BorderLocation::Corner) {
-                        is_end_point_inside
-                    } else {
-                        !is_end_point_inside
-                    };
+                let mut end_point = Point::new(end_x, point.y);
+                let is_start_point_inside = match horizontal_edge_points.get(&end_point) {
+                    Some(point) => {
+                        end_point = *point;
+                        dp.get(&end_point).unwrap().to_owned()
+                    }
+                    // Hit a vertical edge
+                    None => !dp.get(&end_point).unwrap().to_owned(),
+                };
 
                 dp.insert(*point, is_start_point_inside);
                 if is_start_point_inside {
@@ -212,9 +157,9 @@ pub fn part_two(input: &str) -> Option<usize> {
         }
     }
 
-    dbg!(map.iter().sorted_by_key(|x| x.0));
+    // dbg!(map.iter().sorted_by_key(|x| x.0));
 
-    // dbg!();
+    dbg!();
 
     // // find inner point using marching ray
     // let (a, b) = (input[0], input[1]);
