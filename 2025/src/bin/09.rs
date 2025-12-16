@@ -1,13 +1,18 @@
 #![feature(new_range_api)]
 #![feature(negative_impls)]
+#![feature(range_into_bounds)]
+#![feature(range_bounds_is_empty)]
 
 advent_of_code::solution!(9);
 
 use std::{
     cmp::{max, min},
     collections::{HashMap, HashSet},
-    ops, range,
+    ops::{IntoBounds, RangeBounds},
+    range::RangeInclusive,
 };
+
+use itertools::Itertools;
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 struct Point {
@@ -19,15 +24,6 @@ impl Point {
     fn new(x: usize, y: usize) -> Self {
         return Self { x, y };
     }
-}
-
-fn contains(ranges: &Vec<range::RangeInclusive<usize>>, point: Point) -> bool {
-    for range in ranges {
-        if range.contains(&point.x) {
-            return true;
-        }
-    }
-    return false;
 }
 
 pub fn part_one(input: &str) -> Option<usize> {
@@ -64,8 +60,7 @@ pub fn part_two(input: &str) -> Option<usize> {
     // find all borders of simple polygon
     let mut vertical_edge_points: HashSet<Point> = HashSet::new();
     let mut horizontal_edge_points: HashMap<Point, Point> = HashMap::new();
-    let mut horizontal_edge_ranges: HashMap<usize, Vec<range::RangeInclusive<usize>>> =
-        HashMap::new();
+    let mut horizontal_edge_ranges: HashMap<usize, Vec<RangeInclusive<usize>>> = HashMap::new();
     for window in input.windows(2) {
         let (a, b) = (window[0], window[1]);
         // Vertical
@@ -80,7 +75,7 @@ pub fn part_two(input: &str) -> Option<usize> {
                 Point::new(min(a.x, b.x), a.y),
                 Point::new(max(a.x, b.x), a.y),
             );
-            let range = range::RangeInclusive {
+            let range = RangeInclusive {
                 start: min(a.x, b.x),
                 last: max(a.x, b.x),
             };
@@ -101,7 +96,7 @@ pub fn part_two(input: &str) -> Option<usize> {
         edge_points
     };
 
-    let mut map: HashMap<usize, Vec<range::RangeInclusive<usize>>> = HashMap::new();
+    let mut map: HashMap<usize, Vec<RangeInclusive<usize>>> = HashMap::new();
     let mut dp: HashMap<Point, bool> = HashMap::with_capacity(sorted_edge_points.len());
     // find all inside ranges by scaning right to left
     for point in sorted_edge_points.into_iter().rev() {
@@ -116,7 +111,7 @@ pub fn part_two(input: &str) -> Option<usize> {
         match end_x {
             None => {
                 dp.insert(*point, false);
-                let range = range::RangeInclusive {
+                let range = RangeInclusive {
                     start: start_x,
                     last: start_x,
                 };
@@ -136,13 +131,13 @@ pub fn part_two(input: &str) -> Option<usize> {
                 dp.insert(*point, is_start_point_inside);
                 let ranges = map.get_mut(&point.y).unwrap();
                 if is_start_point_inside {
-                    let range = range::RangeInclusive {
+                    let range = RangeInclusive {
                         start: start_x,
                         last: end_x,
                     };
                     *ranges.last_mut().unwrap() = range;
                 } else {
-                    let range = range::RangeInclusive {
+                    let range = RangeInclusive {
                         start: start_x,
                         last: start_x,
                     };
@@ -152,58 +147,65 @@ pub fn part_two(input: &str) -> Option<usize> {
         }
     }
 
-    // dbg!(map.iter().sorted_by_key(|(key, _)| **key));
-    // dbg!(
-    //     horizontal_edge_ranges
-    //         .iter()
-    //         .sorted_by_key(|(key, _)| **key)
-    // );
-
-    for (y, x_ranges) in horizontal_edge_ranges {
-        let last = map.get_mut(&y).unwrap().last_mut().unwrap();
-        let first = x_ranges
-            .iter()
-            .min_by(|a, b| a.start.cmp(&b.start))
-            .unwrap();
-        if last != first {
-            *last = *first;
+    // sort and simplify
+    for (y, x_ranges) in map.iter_mut() {
+        // Add all horizontal edges to map, which may be missing
+        if let Some(edges) = horizontal_edge_ranges.get_mut(&y) {
+            x_ranges.append(edges);
+            horizontal_edge_ranges.remove(&y);
         }
+
+        x_ranges.sort_by(|a, b| a.start.cmp(&b.start));
+        let mut new_x_ranges: Vec<RangeInclusive<usize>> = Vec::new();
+        let mut current: Option<RangeInclusive<usize>> = None;
+        for x_range in x_ranges.into_iter() {
+            match current.as_mut() {
+                Some(_current) => {
+                    if _current.intersect(x_range.clone()).is_empty() {
+                        new_x_ranges.push(_current.clone());
+                        current = None;
+                    } else {
+                        let start = min(_current.start, x_range.start);
+                        let last = max(_current.last, x_range.last);
+                        *_current = RangeInclusive { start, last }
+                    }
+                }
+                None => current = Some(x_range.clone()),
+            }
+        }
+        // There might have been stuff left over in current. If so add it.
+        if let Some(current) = current {
+            new_x_ranges.push(current);
+        }
+        *x_ranges = new_x_ranges;
     }
 
-    // let total = map.iter().fold(0, |acc, (_, ranges)| acc + ranges.len());
     // dbg!(total);
 
-    // dbg!(map.iter().sorted_by_key(|(key, _)| **key));
-
-    // TODO: possible that there could be an entierly enclosed space where the borders touch each other. Might have to scale everything up by 3x to avoid such a possibility
-
-    // for each unqiue pair of red squares:
-    //      march 4 dots on each side of the perimiter
-    //      if any dot crosses a point not in the polygon skip to next pair of squares
-    //      else save area if maximum;
+    // dbg!(
+    //     map.iter()
+    //         // .filter(|(key, _)| *key % 1000 == 0)
+    //         .sorted_by_key(|(key, _)| **key)
+    // );
 
     let mut max_area = 0;
     for (i, a) in input.iter().enumerate() {
         'pairs: for b in input.iter().skip(i + 1) {
-            let x_range = ops::RangeInclusive::new(min(a.x, b.x), max(a.x, b.x));
-            let top_ranges = map.get(&max(a.y, b.y)).unwrap();
-            let bottom_ranges = map.get(&min(a.y, b.y)).unwrap();
+            let y_range = RangeInclusive {
+                start: min(a.y, b.y),
+                last: max(a.y, b.y),
+            };
 
-            for x in x_range {
-                let top_point = Point::new(x, max(a.y, b.y));
-                let bottom_point = Point::new(x, min(a.y, b.y));
+            let x_range = RangeInclusive {
+                start: min(a.x, b.x),
+                last: max(a.x, b.x),
+            };
 
-                if !(contains(top_ranges, top_point) && contains(bottom_ranges, bottom_point)) {
-                    continue 'pairs;
-                }
-            }
-
-            let y_range = ops::RangeInclusive::new(min(a.y, b.y), max(a.y, b.y));
             for y in y_range {
-                let ranges = map.get(&y).unwrap();
-                let right_point = Point::new(max(a.x, b.x), y);
-                let left_point = Point::new(min(a.x, b.x), y);
-                if !(contains(ranges, right_point) && contains(ranges, left_point)) {
+                let x_ranges = map.get(&y).unwrap();
+                if !x_ranges.iter().any(|_x_range| {
+                    _x_range.start <= x_range.start && x_range.last <= _x_range.last
+                }) {
                     continue 'pairs;
                 }
             }
@@ -211,13 +213,11 @@ pub fn part_two(input: &str) -> Option<usize> {
             let delta_x = max(a.x, b.x) - min(a.x, b.x) + 1;
             let delta_y = max(a.y, b.y) - min(a.y, b.y) + 1;
             let area = delta_x * delta_y;
-            // dbg!(a, b, area);
             max_area = max(max_area, area);
         }
     }
 
     return Some(max_area);
-    // return None;
 }
 
 #[cfg(test)]
