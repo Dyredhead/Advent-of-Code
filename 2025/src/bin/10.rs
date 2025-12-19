@@ -64,6 +64,7 @@ pub fn part_one(input: &str) -> Option<usize> {
     );
 }
 
+// https://aoc.winslowjosiah.com/solutions/2025/day/10/
 pub fn part_two(input: &str) -> Option<usize> {
     let input: Vec<(Vec<HashSet<usize>>, Vec<usize>)> = input
         .lines()
