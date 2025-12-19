@@ -191,6 +191,13 @@ pub fn part_two(input: &str) -> Option<usize> {
     let mut max_area = 0;
     for (i, a) in input.iter().enumerate() {
         'pairs: for b in input.iter().skip(i + 1) {
+            let delta_x = max(a.x, b.x) - min(a.x, b.x) + 1;
+            let delta_y = max(a.y, b.y) - min(a.y, b.y) + 1;
+            let area = delta_x * delta_y;
+            if area < max_area {
+                continue;
+            }
+
             let y_range = RangeInclusive {
                 start: min(a.y, b.y),
                 last: max(a.y, b.y),
@@ -210,10 +217,7 @@ pub fn part_two(input: &str) -> Option<usize> {
                 }
             }
 
-            let delta_x = max(a.x, b.x) - min(a.x, b.x) + 1;
-            let delta_y = max(a.y, b.y) - min(a.y, b.y) + 1;
-            let area = delta_x * delta_y;
-            max_area = max(max_area, area);
+            max_area = area;
         }
     }
 

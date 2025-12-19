@@ -1,26 +1,28 @@
 #![feature(strip_circumfix)]
 
-use std::collections::{HashSet, VecDeque};
+use frozenset::Freeze;
+use frozenset::FrozenSet;
+use itertools::Itertools;
+use std::cmp::min;
+use std::collections::{HashMap, HashSet};
+
 advent_of_code::solution!(10);
 
 pub fn part_one(input: &str) -> Option<usize> {
-    let input: Vec<(Vec<bool>, Vec<Vec<usize>>)> = input
+    let input: Vec<(HashSet<usize>, Vec<HashSet<usize>>)> = input
         .lines()
         .map(|line| line.rsplit_once(" ").unwrap().0.split_once(" ").unwrap())
         .map(|line| {
-            let lights: Vec<bool> = line
+            let lights: HashSet<usize> = line
                 .0
                 .strip_circumfix('[', ']')
                 .unwrap()
-                .chars()
-                .map(|c| match c {
-                    '.' => false,
-                    '#' => true,
-                    _ => unreachable!(),
-                })
+                .char_indices()
+                .filter(|(_, c)| *c == '#')
+                .map(|(i, _)| i)
                 .collect();
 
-            let buttons: Vec<Vec<usize>> = line
+            let buttons: Vec<HashSet<usize>> = line
                 .1
                 .split_whitespace()
                 .map(|schematic| {
@@ -37,44 +39,37 @@ pub fn part_one(input: &str) -> Option<usize> {
         })
         .collect();
 
-    let mut sum = 0;
-    for line in input {
-        let start = vec![false; line.0.len()];
-        let mut dp: HashSet<Vec<bool>> = HashSet::new();
-        let mut queue: VecDeque<(usize, Vec<bool>)> = VecDeque::from_iter([(0, start)]);
-        let buttons = line.1;
-        let presses: usize = 'outer: loop {
-            let state = queue.pop_front().unwrap();
-            let (mut presses, lights) = state;
-            presses += 1;
-            for button in buttons.iter() {
-                let mut new_lights = lights.clone();
-                for toggle in button {
-                    new_lights[*toggle] = !new_lights[*toggle];
+    fn get_presses(indicators: HashSet<usize>, buttons: Vec<HashSet<usize>>) -> Option<usize> {
+        for num_presses in 0..(buttons.len() + 1) {
+            for presses in buttons.iter().combinations(num_presses) {
+                let mut pattern = HashSet::new();
+                for button in presses {
+                    pattern = pattern
+                        .symmetric_difference(&button)
+                        .map(|n| n.to_owned())
+                        .collect();
                 }
-                if new_lights == line.0 {
-                    break 'outer presses;
-                } else {
-                    if !dp.contains(&new_lights) {
-                        queue.push_back((presses, new_lights.clone()));
-                        dp.insert(new_lights);
-                    }
+                if pattern == indicators {
+                    return Some(num_presses);
                 }
             }
-        };
-
-        sum += presses;
+        }
+        return None;
     }
 
-    return Some(sum);
+    return Some(
+        input
+            .into_iter()
+            .fold(0, |acc, line| acc + get_presses(line.0, line.1).unwrap()),
+    );
 }
 
 pub fn part_two(input: &str) -> Option<usize> {
-    let input: Vec<(Vec<usize>, Vec<Vec<usize>>)> = input
+    let input: Vec<(Vec<HashSet<usize>>, Vec<usize>)> = input
         .lines()
         .map(|line| line.split_once(" ").unwrap().1.rsplit_once(" ").unwrap())
         .map(|line| {
-            let buttons: Vec<Vec<usize>> = line
+            let buttons: Vec<HashSet<usize>> = line
                 .0
                 .split_whitespace()
                 .map(|schematic| {
@@ -95,47 +90,88 @@ pub fn part_two(input: &str) -> Option<usize> {
                 .map(|c| c.parse().unwrap())
                 .collect();
 
-            (joltages, buttons)
+            (buttons, joltages)
         })
         .collect();
 
-    let mut sum = 0;
-    for line in input {
-        let (goal, mut buttons) = line;
-        buttons.sort_by_key(|key| key.len());
-        buttons.reverse();
-
-        let start = vec![0; goal.len()];
-        let mut dp: HashSet<Vec<usize>> = HashSet::new();
-        let mut queue: VecDeque<(usize, Vec<usize>)> = VecDeque::from_iter([(0, start)]);
-
-        let presses: usize = 'outer: loop {
-            let current = queue.pop_front().unwrap();
-            let (mut presses, lights) = current;
-            presses += 1;
-            'inner: for button in buttons.iter() {
-                let mut next_lights = lights.clone();
-                for toggle in button {
-                    next_lights[*toggle] += 1;
-                    if next_lights[*toggle] > goal[*toggle] {
-                        continue 'inner;
-                    }
+    fn get_patterns(
+        buttons: Vec<HashSet<usize>>,
+    ) -> HashMap<FrozenSet<usize>, Vec<Vec<HashSet<usize>>>> {
+        let mut map_patterns: HashMap<FrozenSet<usize>, Vec<Vec<HashSet<usize>>>> = HashMap::new();
+        for num_presses in 0..(buttons.len() + 1) {
+            for presses in buttons.iter().combinations(num_presses) {
+                let mut pattern = HashSet::new();
+                for button in &presses {
+                    pattern = pattern
+                        .symmetric_difference(&button)
+                        .map(|n| n.to_owned())
+                        .collect();
                 }
-                if next_lights == goal {
-                    break 'outer presses;
-                } else {
-                    if !dp.contains(&next_lights) {
-                        queue.push_back((presses, next_lights.clone()));
-                        dp.insert(next_lights);
+                let presses = presses.iter().map(|&i| i.to_owned()).collect();
+                let frozen_map = pattern.freeze();
+                match map_patterns.get_mut(&frozen_map) {
+                    Some(patterns) => patterns.push(presses),
+                    None => {
+                        map_patterns.insert(frozen_map, Vec::from_iter([presses]));
                     }
                 }
             }
-        };
-
-        sum += presses;
+        }
+        return map_patterns;
     }
 
-    return Some(sum);
+    fn solve_pattern(
+        joltages: Vec<usize>,
+        patterns: HashMap<FrozenSet<usize>, Vec<Vec<HashSet<usize>>>>,
+    ) -> Option<usize> {
+        fn min_presses(
+            target_before: Vec<usize>,
+            patterns: &HashMap<FrozenSet<usize>, Vec<Vec<HashSet<usize>>>>,
+        ) -> Option<usize> {
+            if target_before.iter().all(|&i| i == 0) {
+                return Some(0);
+            }
+
+            let indicators = target_before
+                .iter()
+                .enumerate()
+                .filter(|(_, j)| *j % 2 == 1)
+                .map(|(i, _)| i)
+                .collect::<FrozenSet<usize>>();
+
+            let mut result: Option<usize> = None;
+            'outer: for presses in patterns.get(&indicators).unwrap() {
+                let mut target_after = target_before.clone();
+                for button in presses {
+                    for &joltage_index in button {
+                        match target_after[joltage_index].checked_sub(1) {
+                            Some(n) => target_after[joltage_index] = n,
+                            None => continue 'outer,
+                        }
+                    }
+                }
+                let target_half = target_after.iter().map(|joltage| joltage / 2).collect();
+                let num_target_half_presses = min_presses(target_half, patterns);
+                if num_target_half_presses.is_none() {
+                    continue;
+                }
+                let num_target_half_presses = num_target_half_presses.unwrap();
+                let num_presses = presses.len() + 2 * num_target_half_presses;
+
+                if result.is_none() {
+                    result = Some(num_presses);
+                } else {
+                    result = Some(min(result.unwrap(), num_presses));
+                }
+            }
+            return result;
+        }
+        return min_presses(joltages, &patterns);
+    }
+
+    return Some(input.into_iter().fold(0, |acc, line| {
+        acc + solve_pattern(line.1, get_patterns(line.0)).unwrap_or(0)
+    }));
 }
 
 #[cfg(test)]

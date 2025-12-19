@@ -25,6 +25,7 @@ ascii = "1.1.0"
 # Template dependencies
 chrono = { version = "0.4.38", optional = true }
 dhat = { version = "0.3.3", optional = true }
+frozenset = "0.2.2"
 iter-first-max = "0.1.2"
 itertools = "0.14.0"
 pico-args = "0.5.0"
